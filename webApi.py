@@ -1,10 +1,11 @@
 import sys
 sys.path.append(
     r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
-from flask import Flask, request, jsonify
-import requests
+import json
+from flask import Flask, request
 import mysql.connector
 from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ mydb = mysql.connector.connect(
     host="localhost",
     port="3307",
     user="root",
-    password="yes",
+    password="Ulysses321",
     database='project'
 )
 mycursor = mydb.cursor()
@@ -25,7 +26,7 @@ def main():
 
 
 @app.route('/Create_Post', methods=["GET", "POST"])
-def Create_Post(mydb, mycursor):
+def Create_Post():
 
     if request.method == "POST":
 
@@ -51,7 +52,7 @@ def delete_post():
 
         postID = request.form['postID']
 
-        sql = ("DELETE * FROM posts WHERE postID = '"+postID+"';")
+        sql = ("DELETE FROM posts WHERE postID = '"+postID+"';")
         mycursor.execute(sql)
         mydb.commit()
 
@@ -112,15 +113,31 @@ def reccomended_post():
     return 'not ok'
 
 
+class create_dict(dict):
+
+    def __init__(self):
+        self = dict()
+
+    def add(self, key, value):
+        self[key] = value
+
+
 @app.route('/show_all_posts')
 def show_all_posts():
 
-    mycursor.execute("SELECT * FROM posts")
+    mydict = create_dict()
+    select_employee = """SELECT * FROM posts"""
+    cursor = mydb.cursor()
+    cursor.execute(select_employee)
+    result = cursor.fetchall()
 
-    myresult = mycursor.fetchall()
+    for row in result:
+        mydict.add(row[0], ({"author": row[1], "description": row[2],
+                   "image_url": row[3], "headLine": row[4], "dita": row[4]}))
 
-    for x in myresult:
-        return jsonify(x)
+    res = json.dumps(mydict, indent=2, sort_keys=True)
+
+    return res
 
 
 if __name__ == '__main__':
