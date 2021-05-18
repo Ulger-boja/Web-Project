@@ -4,11 +4,11 @@ create table login
 		primary key,
 	username varchar(50) not null,
 	password varchar(255) not null,
-	roli text not null,
+	role text not null,
 	constraint login_password_uindex
 		unique (password),
-	constraint login_roli_uindex
-		unique (roli) using hash,
+	constraint login_role_uindex
+		unique (role) using hash,
 	constraint login_username_uindex
 		unique (username)
 );
@@ -23,5 +23,16 @@ create table posts
 	date timestamp default CURRENT_TIMESTAMP null
 );
 
+
+create table reccomendations
+(
+	user_id int auto_increment,
+	post_id int null,
+	date timestamp default CURRENT_TIMESTAMP null,
+	constraint reccomendations_pk
+		primary key (user_id),
+	constraint reccomendations_login_ID_fk
+		foreign key (user_id) references login (ID)
+);
 
 
