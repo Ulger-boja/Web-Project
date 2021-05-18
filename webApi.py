@@ -1,7 +1,6 @@
 import sys
 sys.path.append(
     r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
-
 from flask import Flask, request, jsonify
 import requests
 import mysql.connector
@@ -13,7 +12,7 @@ mydb = mysql.connector.connect(
     host="localhost",
     port="3307",
     user="root",
-    password="Ulysses321",
+    password="yes",
     database='project'
 )
 mycursor = mydb.cursor()
@@ -29,7 +28,7 @@ def main():
 def Create_Post(mydb, mycursor):
 
     if request.method == "POST":
-    
+
         headLine = request.form['headLine']
         description = request.form['description']
         image_url = request.form['image_url']
@@ -63,7 +62,7 @@ def delete_post():
 def edit_post():
 
     if request.method == "POST":
-    
+
         postID = request.form['postID']
         headLine = request.form['headLine']
         description = request.form['description']
@@ -71,7 +70,8 @@ def edit_post():
         author = request.form['author']
         dita = datetime.today().strftime('%Y-%m-%d')
 
-        sql = ("UPDATE posts WHERE SET headLine = '"+headLine+"',description = '"+description+"',image_url = '"+image_url+"',author = '"+author+"',dita = '"+dita+"' WHERE postID = '"+postID+"';")
+        sql = ("UPDATE posts WHERE SET headLine = '"+headLine+"',description = '"+description +
+               "',image_url = '"+image_url+"',author = '"+author+"',dita = '"+dita+"' WHERE postID = '"+postID+"';")
         mycursor.execute(sql)
         mydb.commit()
 
@@ -82,11 +82,12 @@ def edit_post():
 def user_create():
 
     if request.method == "POST":
-    
+
         username = request.form['username']
         password = request.form['password']
 
-        sql = ("INSERT INTO login (username,password,roli) VALUES ('"+username+"','"+password+"', 'user')")
+        sql = ("INSERT INTO login (username,password,roli) VALUES ('" +
+               username+"','"+password+"', 'user')")
         mycursor.execute(sql)
         mydb.commit()
 
@@ -110,6 +111,7 @@ def reccomended_post():
 
     return 'not ok'
 
+
 @app.route('/show_all_posts')
 def show_all_posts():
 
@@ -118,7 +120,8 @@ def show_all_posts():
     myresult = mycursor.fetchall()
 
     for x in myresult:
-      return jsonify(x)
+        return jsonify(x)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
