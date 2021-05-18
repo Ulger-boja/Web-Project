@@ -1,20 +1,19 @@
+
 import sys
 sys.path.append(
     r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
-import json
-from flask import Flask, request
 import mysql.connector
-from datetime import datetime
-
+from flask import Flask, request
+import json
 
 app = Flask(__name__)
 
 mydb = mysql.connector.connect(
-    host="localhost",
-    port="3307",
-    user="root",
-    password="Ulysses321",
-    database='project'
+    host="db-mysql-ams3-87275-do-user-9252818-0.b.db.ondigitalocean.com",
+    port="25060",
+    user="doadmin",
+    password="xsyy941cq8224eaj",
+    database='defaultdb',
 )
 mycursor = mydb.cursor()
 
@@ -34,10 +33,9 @@ def Create_Post():
         description = request.form['description']
         image_url = request.form['image_url']
         author = request.form['author']
-        dita = datetime.today().strftime('%Y-%m-%d')
 
-        sql = ("INSERT INTO posts (headLine,description,image_url,author,dita) VALUES ('" +
-               headLine+"','"+description+"','"+image_url+"','"+author+"','"+dita+"');")
+        sql = ("INSERT INTO posts (headLine,description,image_url,author) VALUES ('" +
+               headLine+"','"+description+"','"+image_url+"','"+author+"');")
 
         mycursor.execute(sql)
         mydb.commit()
@@ -69,10 +67,9 @@ def edit_post():
         description = request.form['description']
         image_url = request.form['image_url']
         author = request.form['author']
-        dita = datetime.today().strftime('%Y-%m-%d')
 
         sql = ("UPDATE posts WHERE SET headLine = '"+headLine+"',description = '"+description +
-               "',image_url = '"+image_url+"',author = '"+author+"',dita = '"+dita+"' WHERE postID = '"+postID+"';")
+               "',image_url = '"+image_url+"',author = '"+author+"' WHERE postID = '"+postID+"';")
         mycursor.execute(sql)
         mydb.commit()
 
