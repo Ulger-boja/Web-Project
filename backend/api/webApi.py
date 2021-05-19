@@ -1,13 +1,21 @@
-
 import sys
 sys.path.append(
     r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
+
+######## fshi kto gjonat lart nese do qe tet punojn modulet se un kam ca probleme me pathin #######
+
+
 import mysql.connector
-from flask import Flask, request
+from flask import Flask, request,Blueprint
 import json
+import os
 
 app = Flask(__name__)
-
+                                                                                ###
+###################################################################         #################
+app.config["imageUpload"] = "buffer url ktu rregulloje vet elidor"#     #####################
+###################################################################         #################
+                                                                                ###
 mydb = mysql.connector.connect(
     host="db-mysql-ams3-87275-do-user-9252818-0.b.db.ondigitalocean.com",
     port="25060",
@@ -17,10 +25,9 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-
 @app.route('/')
 def main():
-
+    
     return 'Wellcome to fish\'s API'
 
 
@@ -31,14 +38,19 @@ def Create_Post():
 
         headLine = request.form['headLine']
         description = request.form['description']
-        image_url = request.form['image_url']
         author = request.form['author']
 
-        sql = ("INSERT INTO posts (headLine,description,image_url,author) VALUES ('" +
-               headLine+"','"+description+"','"+image_url+"','"+author+"');")
+        sql = ("INSERT INTO posts (headLine,description,author) VALUES ('" +
+               headLine+"','"+description+"','"+author+"');")
 
         mycursor.execute(sql)
         mydb.commit()
+
+        if request.files:
+            image = request.files["image"]
+            print(image)
+            image.save(os.path.join(
+                app.config["imageUpload"], image.filename))
 
     return 'ok'
 
@@ -48,35 +60,40 @@ def delete_post():
 
     if request.method == "POST":
 
-        postID = request.form['postID']
+        postID = request.form['post_id']
 
-        sql = ("DELETE FROM posts WHERE postID = '"+postID+"';")
+        sql = ("DELETE FROM posts WHERE post_id = '"+postID+"';")
         mycursor.execute(sql)
         mydb.commit()
 
     return 'ok'
 
 
-@app.route('/edit_post')
+@app.route('/edit_post', methods=["GET", "POST"])
 def edit_post():
 
     if request.method == "POST":
 
-        postID = request.form['postID']
+        postID = request.form['post_id']
         headLine = request.form['headLine']
         description = request.form['description']
-        image_url = request.form['image_url']
         author = request.form['author']
 
         sql = ("UPDATE posts WHERE SET headLine = '"+headLine+"',description = '"+description +
-               "',image_url = '"+image_url+"',author = '"+author+"' WHERE postID = '"+postID+"';")
+               ",author = '"+author+"' WHERE post_id = '"+postID+"';")
         mycursor.execute(sql)
         mydb.commit()
+
+        if request.files:
+            image = request.files["image"]
+            print(image)
+            image.save(os.path.join(
+                app.config["imageUpload"], image.filename))
 
     return 'ok'
 
 
-@app.route('/user_create')
+@app.route('/user_create', methods=["GET", "POST"])
 def user_create():
 
     if request.method == "POST":
@@ -92,23 +109,19 @@ def user_create():
     return 'ok'
 
 
-@app.route('/user_validate')
-def user_validate():
-
-    return 'not ok'
-
-
-@app.route('/get_posts_by_user_id')
+@app.route('/get_posts_by_user_id', methods=["GET", "POST"])
 def get_posts_by_user_id():
 
-    return 'not ok'
+    if request.method == "POST":
+    
+        userid = request.form['user_id']
+        postID = request.form['post_id']
 
+        sql = ("INSERT INTO reccomendations (user_id,post_id) VALUES ('"+userid+"','"+postID+"')")
+        mycursor.execute(sql)
+        mydb.commit()
 
-@app.route('/reccomended_post')
-def reccomended_post():
-
-    return 'not ok'
-
+    return 'ok'
 
 class create_dict(dict):
 
@@ -119,13 +132,13 @@ class create_dict(dict):
         self[key] = value
 
 
-@app.route('/show_all_posts')
-def show_all_posts():
+@app.route('/get_posts', methods=["GET", "POST"])
+def get_posts():
 
     mydict = create_dict()
-    select_employee = """SELECT * FROM posts"""
+    select_post = """SELECT * FROM posts"""
     cursor = mydb.cursor()
-    cursor.execute(select_employee)
+    cursor.execute(select_post)
     result = cursor.fetchall()
 
     for row in result:
@@ -135,6 +148,46 @@ def show_all_posts():
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
     return res
+
+@app.route('/get_post_by_id', methods=["GET", "POST"])
+def get_post_by_id():
+
+    if request.method == "POST":
+
+        postID = request.form['post_id']
+
+        mydict = create_dict()
+        select_post = ("SELECT * FROM posts WHERE post_id = '"+postID+"'")
+        cursor = mydb.cursor()
+        cursor.execute(select_post)
+        result = cursor.fetchall()
+
+        for row in result:
+            mydict.add(row[0], ({"author": row[1], "description": row[2],
+                       "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+
+        res = json.dumps(mydict, indent=2, sort_keys=True)
+
+        return res
+
+@app.route('/reccomended_post', methods=["GET", "POST"])
+def reccomended_post():
+
+    mydict = create_dict()
+    select_post = """SELECT * FROM reccomendations"""
+    cursor = mydb.cursor()
+    cursor.execute(select_post)
+    result = cursor.fetchall()
+
+    for row in result:
+        mydict.add(row[0], ({"author": row[1], "description": row[2],
+                   "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+
+    res = json.dumps(mydict, indent=2, sort_keys=True)
+
+    return res
+
+
 
 
 if __name__ == '__main__':
