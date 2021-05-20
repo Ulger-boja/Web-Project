@@ -170,10 +170,10 @@ def get_posts():
 
     return res
 
-@app.route('/get_post_by_id', methods=["GET", "POST"])
+@app.route('/get_post_by_id', methods=["GET"])
 def get_post_by_id():
 
-    if request.method == "POST":
+    if request.method == "GET":
 
         postID = request.form['post_id']
 
@@ -191,7 +191,7 @@ def get_post_by_id():
 
         return res
 
-@app.route('/reccomended_post', methods=["GET", "POST"])
+@app.route('/reccomended_post', methods=["GET"])
 def reccomended_post():
 
     mydict = create_dict()
