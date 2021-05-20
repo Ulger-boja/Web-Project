@@ -22,9 +22,7 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-"""
-    Upload User Profile Photo
-    """
+upload = uploader
 
 
 
@@ -59,6 +57,7 @@ def Create_Post():
             bucket = 'web-project'
             image = request.files["image"]
             filename = secure_filename(image.filename)
+            filename = filename + upload.get_random_string(10)
             content_type = 'image/jpg'
             client.put_object(Body=image,
                               Bucket=bucket,
@@ -66,8 +65,10 @@ def Create_Post():
                               ContentType=content_type,
                               ACL='public-read')
 
-        sql = ("INSERT INTO posts (headLine,description,author) VALUES ('" +
-               headLine + "','" + description + "','" + author + "');")
+
+        url = 'https://web-project.fra1.digitaloceanspaces.com/'+filename
+        sql = ("INSERT INTO posts (headLine,description,author, image_url) VALUES ('" +
+               headLine + "','" + description + "','" + author + "','"+url+"');")
         mycursor.execute(sql)
         mydb.commit()
 
@@ -75,10 +76,10 @@ def Create_Post():
     return '200'
 
 
-@app.route('/delete_post', methods=["GET", "POST"])
+@app.route('/delete_post', methods=["DELETE"])
 def delete_post():
 
-    if request.method == "POST":
+    if request.method == "DELETE":
 
         postID = request.form['post_id']
 
@@ -86,7 +87,7 @@ def delete_post():
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/edit_post', methods=["GET", "POST"])
@@ -110,7 +111,7 @@ def edit_post():
             image.save(os.path.join(
                 app.config["imageUpload"], image.filename))
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/user_create', methods=["GET", "POST"])
@@ -126,7 +127,7 @@ def user_create():
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/get_posts_by_user_id', methods=["GET", "POST"])
@@ -141,7 +142,7 @@ def get_posts_by_user_id():
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
 
 class create_dict(dict):
 
@@ -152,7 +153,7 @@ class create_dict(dict):
         self[key] = value
 
 
-@app.route('/get_posts', methods=["GET", "POST"])
+@app.route('/get_posts', methods=["GET"])
 def get_posts():
 
     mydict = create_dict()
