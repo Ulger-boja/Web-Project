@@ -67,6 +67,6 @@ print(base_url+name)'''
 #End block comment here after saving path at path.txt
 
 
-'''with open('path.txt', 'r') as file:
+''''with open('path.txt', 'r') as file:
     data = file.read().replace('\n', '')
 print(type(data), data)'''

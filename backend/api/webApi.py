@@ -8,25 +8,11 @@ import json
 import os
 from  utilities.upload import AzureBlobFileUploader as uploader
 app = Flask(__name__)
+import boto3
+from werkzeug.utils import secure_filename
 
-#path = os.getcwd()
 
-#TODO:Find why this still return home dir
-#Note run upload.py seperately then comment the path finding part
-with open('data.txt', 'r') as file:
-    data = file.read().replace('\n', '')
-print(data, 'data')
-#upload = uploader
-#TODO:Find why it only works if the path is hardwritten
-path = '/media/elidor/CC98A71E98A70654/Ubuntu/Web-Project/backend/buffer'
-print(path)
-#path = path.replace('api', 'buffer')
 
-###
-###################################################################         #################
-app.config["imageUpload"] = path#     #####################
-###################################################################         #################
-                                                                                ###
 mydb = mysql.connector.connect(
     host="db-mysql-ams3-87275-do-user-9252818-0.b.db.ondigitalocean.com",
     port="25060",
@@ -35,6 +21,23 @@ mydb = mysql.connector.connect(
     database='defaultdb',
 )
 mycursor = mydb.cursor()
+
+"""
+    Upload User Profile Photo
+    """
+
+
+
+session = boto3.session.Session()
+client = session.client('s3',
+                            region_name='nyc3',
+                            endpoint_url='https://fra1.digitaloceanspaces.com',
+                            aws_access_key_id='NS24MAUHRGZ56BDTJRSF',
+                            aws_secret_access_key='Z6oz3oxKV47F91gEUoZNorpowqZ9gvLelsPKsfiTAXs')
+
+
+
+
 
 @app.route('/')
 def main():
@@ -53,11 +56,16 @@ def Create_Post():
 
 
         if request.files:
+            bucket = 'web-project'
             image = request.files["image"]
-            print(image)
-            print(path)
-            image.save(os.path.join(
-                path, image.filename))
+            filename = secure_filename(image.filename)
+            content_type = 'image/jpg'
+            client.put_object(Body=image,
+                              Bucket=bucket,
+                              Key=filename,
+                              ContentType=content_type,
+                              ACL='public-read')
+
         sql = ("INSERT INTO posts (headLine,description,author) VALUES ('" +
                headLine + "','" + description + "','" + author + "');")
         mycursor.execute(sql)
