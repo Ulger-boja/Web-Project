@@ -1,21 +1,19 @@
 import sys
 sys.path.append(
     r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
-
-######## fshi kto gjonat lart nese do qe tet punojn modulet se un kam ca probleme me pathin #######
-
-
-import mysql.connector
-from flask import Flask, request,Blueprint
-import json
+from flask import Flask, request, Blueprint
 import os
+import json
+import mysql.connector
+
 
 app = Flask(__name__)
-                                                                                ###
-###################################################################         #################
-app.config["imageUpload"] = "buffer url ktu rregulloje vet elidor"#     #####################
-###################################################################         #################
-                                                                                ###
+
+path = os.getcwd()
+path = path.replace('api', 'buffer')
+
+app.config["imageUpload"] = path
+
 mydb = mysql.connector.connect(
     host="db-mysql-ams3-87275-do-user-9252818-0.b.db.ondigitalocean.com",
     port="25060",
@@ -25,9 +23,10 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
+
 @app.route('/')
 def main():
-    
+
     return 'Wellcome to fish\'s API'
 
 
@@ -52,7 +51,7 @@ def Create_Post():
             image.save(os.path.join(
                 app.config["imageUpload"], image.filename))
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/delete_post', methods=["GET", "POST"])
@@ -66,7 +65,7 @@ def delete_post():
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/edit_post', methods=["GET", "POST"])
@@ -90,7 +89,7 @@ def edit_post():
             image.save(os.path.join(
                 app.config["imageUpload"], image.filename))
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/user_create', methods=["GET", "POST"])
@@ -106,22 +105,24 @@ def user_create():
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
 
 
 @app.route('/get_posts_by_user_id', methods=["GET", "POST"])
 def get_posts_by_user_id():
 
     if request.method == "POST":
-    
+
         userid = request.form['user_id']
         postID = request.form['post_id']
 
-        sql = ("INSERT INTO reccomendations (user_id,post_id) VALUES ('"+userid+"','"+postID+"')")
+        sql = ("INSERT INTO reccomendations (user_id,post_id) VALUES ('" +
+               userid+"','"+postID+"')")
         mycursor.execute(sql)
         mydb.commit()
 
-    return 'ok'
+    return '200'
+
 
 class create_dict(dict):
 
@@ -149,6 +150,7 @@ def get_posts():
 
     return res
 
+
 @app.route('/get_post_by_id', methods=["GET", "POST"])
 def get_post_by_id():
 
@@ -170,6 +172,7 @@ def get_post_by_id():
 
         return res
 
+
 @app.route('/reccomended_post', methods=["GET", "POST"])
 def reccomended_post():
 
@@ -186,8 +189,6 @@ def reccomended_post():
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
     return res
-
-
 
 
 if __name__ == '__main__':
