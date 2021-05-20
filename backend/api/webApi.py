@@ -1,19 +1,30 @@
 import sys
-sys.path.append(
-    r'C:\Users\UlgerBoja\AppData\Local\Programs\Python\Python39\Lib\site-packages')
 
-######## fshi kto gjonat lart nese do qe tet punojn modulet se un kam ca probleme me pathin #######
 
 
 import mysql.connector
 from flask import Flask, request,Blueprint
 import json
 import os
-
+from  utilities.upload import AzureBlobFileUploader as uploader
 app = Flask(__name__)
-                                                                                ###
+
+#path = os.getcwd()
+
+#TODO:Find why this still return home dir
+#Note run upload.py seperately then comment the path finding part
+with open('data.txt', 'r') as file:
+    data = file.read().replace('\n', '')
+print(data, 'data')
+#upload = uploader
+#TODO:Find why it only works if the path is hardwritten
+path = '/media/elidor/CC98A71E98A70654/Ubuntu/Web-Project/backend/buffer'
+print(path)
+#path = path.replace('api', 'buffer')
+
+###
 ###################################################################         #################
-app.config["imageUpload"] = "buffer url ktu rregulloje vet elidor"#     #####################
+app.config["imageUpload"] = path#     #####################
 ###################################################################         #################
                                                                                 ###
 mydb = mysql.connector.connect(
@@ -28,7 +39,7 @@ mycursor = mydb.cursor()
 @app.route('/')
 def main():
     
-    return 'Wellcome to fish\'s API'
+    return 'Welcome to fish\'s API'
 
 
 @app.route('/Create_Post', methods=["GET", "POST"])
@@ -38,21 +49,22 @@ def Create_Post():
 
         headLine = request.form['headLine']
         description = request.form['description']
-        author = request.form['author']
+        author = str(request.form['author'])
 
-        sql = ("INSERT INTO posts (headLine,description,author) VALUES ('" +
-               headLine+"','"+description+"','"+author+"');")
-
-        mycursor.execute(sql)
-        mydb.commit()
 
         if request.files:
             image = request.files["image"]
             print(image)
+            print(path)
             image.save(os.path.join(
-                app.config["imageUpload"], image.filename))
+                path, image.filename))
+        sql = ("INSERT INTO posts (headLine,description,author) VALUES ('" +
+               headLine + "','" + description + "','" + author + "');")
+        mycursor.execute(sql)
+        mydb.commit()
 
-    return 'ok'
+
+    return '200'
 
 
 @app.route('/delete_post', methods=["GET", "POST"])
