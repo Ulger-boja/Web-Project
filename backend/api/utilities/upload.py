@@ -30,15 +30,13 @@ class AzureBlobFileUploader:
         letters = string.ascii_lowercase
         result_str = ''.join(random.choice(letters) for i in range(length))
         return result_str + '.jpg'
-    def upload_image(self, file_name):
+    def upload_image(self, file_name, path, filename):
         # Create blob with same name as local file name
         blob_client = self.blob_service_client.get_blob_client(container=MY_IMAGE_CONTAINER,
                                                                blob=file_name)
         # Get full current path and substitute utilities with buffer used to temporary store image data
-        path = os.getcwd()
-        path = path.replace('utilities', 'buffer')
         print(path)
-        upload_file_path = path +'/rottie.jpg'
+        upload_file_path = path +filename
 
         # Create blob on storage
         # Overwrite if it already exists!
@@ -47,11 +45,28 @@ class AzureBlobFileUploader:
         with open(upload_file_path, "rb") as data:
             blob_client.upload_blob(data, overwrite=True, content_settings=image_content_setting)
         return file_name
+    def path(self):
+        # Get full current path and substitute utilities with buffer used to temporary store image data
+        path = os.getcwd()
+        path = path.replace('/api','')
+        path = path.replace('utilities', 'buffer')
+        text_file = open("data.txt", "w")
+        n = text_file.write(path)
+        text_file.close()
+        return path
 
 
-# Initialize class and upload files
-azure_blob_file_uploader = AzureBlobFileUploader()
+# Comment this block
+'''azure_blob_file_uploader = AzureBlobFileUploader()
 #azure_blob_file_uploader.upload_all_images_in_folder()
-name = azure_blob_file_uploader.upload_image(AzureBlobFileUploader.get_random_string(11))
+path = azure_blob_file_uploader.path()
+name = azure_blob_file_uploader.upload_image(AzureBlobFileUploader.get_random_string(11), path, '/rottie.jpg')
 base_url = 'https://viaegnatia20.blob.core.windows.net/egnatia20/'
-print(base_url+name)
+
+print(base_url+name)'''
+#End block comment here after saving path at path.txt
+
+
+''''with open('path.txt', 'r') as file:
+    data = file.read().replace('\n', '')
+print(type(data), data)'''
