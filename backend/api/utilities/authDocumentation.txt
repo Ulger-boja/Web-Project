@@ -1,0 +1,25 @@
+1- /provideToken [POST]
+Query Params : userId
+Returns : token
+Description: Merr userId nga api kryesor mbas logimit te userit, gjeneron tokenin dhe ja bashkangjit userit perkates ne db dhe ne fund kthen tokenin.
+////////////////
+Per peshkun: Ne momentin qe useri ben login nga api jot ti do marresh username dhe pass edhe do besh query qe te te kthej userId.
+Pasi te marresh kte userId do ma cosh mua te metoda e mesiperme dhe une do te te kthej token qe do e ruash si cookie ose session nuk ka rendsi si vetem mjafton ta ruash.
+/////////////////
+
+2- /provieRole [GET]
+Query Params : token
+Returns : role
+Description: Merr tokenin dhe kthen rolin qe i perket userit qe ka kte token.
+////////////////
+Per peshkun: Kjo metoda sherben qe te marresh rolin qe i perket userit. Ne momentin qe te duhet te besh nje thirrje qe kerkon vertetim roli ti godet kte metoden dhe dergon tokenin ndersa une te kthej rolin thjesht si string qe mos lodhesh me json.
+////////////////
+
+3- /provideUser [GET]
+Query Params : token
+Returns : user
+Description: Merr tokenin dhe kthen userin.
+////////////////
+Per peshkun: Kjo se besoj se do perdoret po po e lej ktu. Ne rast se do te duhet me thuaj qe ta kthej response ne json se ta kam len vetem me values jo kv pair.
+////////////////
+
