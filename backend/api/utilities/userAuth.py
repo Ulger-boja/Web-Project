@@ -13,18 +13,14 @@ dbContext = mysql.connector.connect(
 )
 cursor = dbContext.cursor()
 
-@app.route('/provideToken', methods=["POST"])
-def provideToken():
+def provideToken(userId):
     token = generate()
-    userId = request.args.get('userId')
     command = ("UPDATE author SET token = '"+token+"' WHERE user_id = '"+userId+"';")
     cursor.execute(command)
     dbContext.commit()
     return token
 
-@app.route('/provideRole', methods=["GET"])
-def provideRole():   
-    token = request.args.get('token')
+def provideRole(token):   
     getAuthorQuery = ("SELECT user_id FROM author WHERE token = '"+token+"'")
     cursor.execute(getAuthorQuery)
     userId = str(cursor.fetchone()[0])
@@ -33,9 +29,7 @@ def provideRole():
     role = str(cursor.fetchone()[0])
     return role
 
-@app.route('/provideUser', methods=["GET"])
-def provideUser():
-    token = request.args.get('token')
+def provideUser(token):
     getAuthorQuery = ("SELECT user_id FROM author WHERE token = '"+token+"'")
     cursor.execute(getAuthorQuery)
     userId = str(cursor.fetchone()[0])
