@@ -1,16 +1,14 @@
+from werkzeug.utils import secure_filename
+import boto3
 import sys
 
 
-
 import mysql.connector
-from flask import Flask, request,Blueprint
+from flask import Flask, request, Blueprint
 import json
 import os
-from  utilities.upload import AzureBlobFileUploader as uploader
+from utilities.upload import AzureBlobFileUploader as uploader
 app = Flask(__name__)
-import boto3
-from werkzeug.utils import secure_filename
-
 
 
 mydb = mysql.connector.connect(
@@ -25,21 +23,17 @@ mycursor = mydb.cursor()
 upload = uploader
 
 
-
 session = boto3.session.Session()
 client = session.client('s3',
-                            region_name='nyc3',
-                            endpoint_url='https://fra1.digitaloceanspaces.com',
-                            aws_access_key_id='NS24MAUHRGZ56BDTJRSF',
-                            aws_secret_access_key='Z6oz3oxKV47F91gEUoZNorpowqZ9gvLelsPKsfiTAXs')
-
-
-
+                        region_name='nyc3',
+                        endpoint_url='https://fra1.digitaloceanspaces.com',
+                        aws_access_key_id='NS24MAUHRGZ56BDTJRSF',
+                        aws_secret_access_key='Z6oz3oxKV47F91gEUoZNorpowqZ9gvLelsPKsfiTAXs')
 
 
 @app.route('/')
 def main():
-    
+
     return 'Welcome to fish\'s API'
 
 
@@ -51,7 +45,6 @@ def Create_Post():
         headLine = request.form['headLine']
         description = request.form['description']
         author = str(request.form['author'])
-
 
         if request.files:
             bucket = 'web-project'
@@ -65,13 +58,11 @@ def Create_Post():
                               ContentType=content_type,
                               ACL='public-read')
 
-
         url = 'https://web-project.fra1.digitaloceanspaces.com/'+filename
         sql = ("INSERT INTO posts (headLine,description,author, image_url) VALUES ('" +
                headLine + "','" + description + "','" + author + "','"+url+"');")
         mycursor.execute(sql)
         mydb.commit()
-
 
     return '200'
 
@@ -134,15 +125,17 @@ def user_create():
 def get_posts_by_user_id():
 
     if request.method == "POST":
-    
+
         userid = request.form['user_id']
         postID = request.form['post_id']
 
-        sql = ("INSERT INTO reccomendations (user_id,post_id) VALUES ('"+userid+"','"+postID+"')")
+        sql = ("INSERT INTO reccomendations (user_id,post_id) VALUES ('" +
+               userid+"','"+postID+"')")
         mycursor.execute(sql)
         mydb.commit()
 
     return '200'
+
 
 class create_dict(dict):
 
@@ -164,11 +157,12 @@ def get_posts():
 
     for row in result:
         mydict.add(row[0], ({"author": row[1], "description": row[2],
-                   "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+                             "image_url": row[3], "headLine": row[4], "dita": row[4]}))
 
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
     return res
+
 
 @app.route('/get_post_by_id', methods=["GET"])
 def get_post_by_id():
@@ -185,30 +179,30 @@ def get_post_by_id():
 
         for row in result:
             mydict.add(row[0], ({"author": row[1], "description": row[2],
-                       "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+                                 "image_url": row[3], "headLine": row[4], "dita": row[4]}))
 
         res = json.dumps(mydict, indent=2, sort_keys=True)
 
         return res
 
+
 @app.route('/reccomended_post', methods=["GET"])
 def reccomended_post():
 
+    postID = request.form['post_id']
     mydict = create_dict()
-    select_post = """SELECT * FROM reccomendations"""
+    select_post = """SELECT * FROM reccomendations LEFT JOIN post_id on posts.post_id = reccomendations.post_id """
     cursor = mydb.cursor()
     cursor.execute(select_post)
     result = cursor.fetchall()
 
     for row in result:
         mydict.add(row[0], ({"author": row[1], "description": row[2],
-                   "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+                             "image_url": row[3], "headLine": row[4], "dita": row[4]}))
 
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
     return res
-
-
 
 
 if __name__ == '__main__':
