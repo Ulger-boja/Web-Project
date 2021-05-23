@@ -183,9 +183,10 @@ def login():
 
             else:
 
-                tokenAndRole = "{'token' : '"+token+"', 'role' : '"+role+"'}"
+                tokenAndRole = {'token': token, 'role': role}
+                res = json.dumps(tokenAndRole)
 
-        return json.dumps(tokenAndRole)
+    return res
 
 
 @app.route('/get_posts', methods=["GET"])
