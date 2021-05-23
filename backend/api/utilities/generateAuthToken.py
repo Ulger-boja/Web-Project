@@ -1,7 +1,9 @@
 import uuid
 
-def generate():
-    token = str(uuid.uuid4())
-    return token
+
+class gen:
+    def generate(self):
+        token = str(uuid.uuid4())
+        return token
 
     

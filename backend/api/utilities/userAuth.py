@@ -1,6 +1,6 @@
 import mysql.connector
 from flask import Flask, request,Response
-from backend.utilities.generateAuthToken import generate
+import uuid
 
 app = Flask(__name__)
 
@@ -13,9 +13,15 @@ dbContext = mysql.connector.connect(
 )
 cursor = dbContext.cursor()
 
+
+def generate():
+    token = str(uuid.uuid4())
+    return token
+
+
 def provideToken(userId):
     token = generate()
-    command = ("UPDATE author SET token = '"+token+"' WHERE user_id = '"+userId+"';")
+    command = ("UPDATE author SET token = '"+str(token)+"' WHERE user_id = '"+str(userId)+"';")
     cursor.execute(command)
     dbContext.commit()
     return token

@@ -7,7 +7,8 @@ import mysql.connector
 from flask import Flask, request, Blueprint
 import json
 import os
-from utilities.upload import AzureBlobFileUploader as uploader
+from utilities.userAuth import provideToken
+
 app = Flask(__name__)
 
 
@@ -17,10 +18,10 @@ mydb = mysql.connector.connect(
     user="doadmin",
     password="xsyy941cq8224eaj",
     database='defaultdb',
+    auth_plugin='mysql_native_password'
 )
 mycursor = mydb.cursor()
 
-upload = uploader
 
 
 session = boto3.session.Session()
@@ -50,7 +51,7 @@ def Create_Post():
             bucket = 'web-project'
             image = request.files["image"]
             filename = secure_filename(image.filename)
-            filename = filename + upload.get_random_string(10)
+            filename = filename
             content_type = 'image/jpg'
             client.put_object(Body=image,
                               Bucket=bucket,
@@ -144,6 +145,33 @@ class create_dict(dict):
 
     def add(self, key, value):
         self[key] = value
+@app.route('/login', methods = ['POST'])
+def login():
+    id = None
+
+    if request.method == "POST":
+        username = request.form['username']
+        password = request.form['password']
+
+        sql = ("SELECT ID FROM login WHERE username = '"+str(username)+"' AND password = '"+str(password)+"'")
+        cursor = mydb.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        val = 0
+        for row in result:
+            val = row[0]
+            id = val
+        if id ==None:
+            return '404'
+
+        else:
+            token = provideToken(id)
+
+
+
+
+        return json.dumps(token)
+
 
 
 @app.route('/get_posts', methods=["GET"])
@@ -172,7 +200,7 @@ def get_post_by_id():
         postID = request.form['post_id']
 
         mydict = create_dict()
-        select_post = ("SELECT * FROM posts WHERE post_id = '"+postID+"'")
+        select_post = ("SELECT * FROM posts WHERE post_id = '"+str(postID)+"'")
         cursor = mydb.cursor()
         cursor.execute(select_post)
         result = cursor.fetchall()
