@@ -7,7 +7,8 @@ import mysql.connector
 from flask import Flask, request, Blueprint
 import json
 import os
-from utilities.userAuth import provideToken
+from utilities.userAuth import provideToken, provideRole, provideUser
+
 
 app = Flask(__name__)
 
@@ -21,7 +22,6 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password'
 )
 mycursor = mydb.cursor()
-
 
 
 session = boto3.session.Session()
@@ -145,7 +145,9 @@ class create_dict(dict):
 
     def add(self, key, value):
         self[key] = value
-@app.route('/login', methods = ['POST'])
+
+
+@app.route('/login', methods=['POST'])
 def login():
     id = None
 
@@ -153,7 +155,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        sql = ("SELECT ID FROM login WHERE username = '"+str(username)+"' AND password = '"+str(password)+"'")
+        sql = ("SELECT ID FROM login WHERE username = '" +
+               str(username)+"' AND password = '"+str(password)+"'")
         cursor = mydb.cursor()
         cursor.execute(sql)
         result = cursor.fetchall()
@@ -161,17 +164,28 @@ def login():
         for row in result:
             val = row[0]
             id = val
-        if id ==None:
+        if id == None:
             return '404'
 
         else:
             token = provideToken(id)
+            sql = ("SELECT role FROM login WHERE username = '" +
+                   str(username)+"' AND password = '"+str(password)+"'")
+            cursor = mydb.cursor()
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            val = 0
+            for row in result:
+                val = row[0]
+                role = val
+            if id == None:
+                return '404'
 
+            else:
 
+                tokenAndRole = "{'token' : '"+token+"', 'role' : '"+role+"'}"
 
-
-        return json.dumps(token)
-
+        return json.dumps(tokenAndRole)
 
 
 @app.route('/get_posts', methods=["GET"])
