@@ -1,14 +1,10 @@
 from werkzeug.utils import secure_filename
 import boto3
-import sys
-
-
 import mysql.connector
 from flask import Flask, request, Blueprint
 import json
 import os
 from utilities.userAuth import provideToken, provideRole, provideUser
-
 
 app = Flask(__name__)
 
@@ -199,8 +195,8 @@ def get_posts():
     result = cursor.fetchall()
 
     for row in result:
-        mydict.add(row[0], ({"author": row[1], "description": row[2],
-                             "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+        mydict.add(row[0], ({"headLine": row[1], "authon": row[2],
+                             "image_url": row[3], "description": row[4], "dita": str(row[5])}))
 
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
@@ -221,8 +217,8 @@ def get_post_by_id():
         result = cursor.fetchall()
 
         for row in result:
-            mydict.add(row[0], ({"author": row[1], "description": row[2],
-                                 "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+            mydict.add(row[0], ({"headLine": row[1], "authon": row[2],
+                                 "image_url": row[3], "description": row[4], "dita": str(row[5])}))
 
         res = json.dumps(mydict, indent=2, sort_keys=True)
 
@@ -240,8 +236,8 @@ def reccomended_post():
     result = cursor.fetchall()
 
     for row in result:
-        mydict.add(row[0], ({"author": row[1], "description": row[2],
-                             "image_url": row[3], "headLine": row[4], "dita": row[4]}))
+        mydict.add(row[0], ({"headLine": row[1], "authon": row[2],
+                             "image_url": row[3], "description": row[4], "dita": str(row[5])}))
 
     res = json.dumps(mydict, indent=2, sort_keys=True)
 
